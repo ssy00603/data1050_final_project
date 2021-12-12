@@ -1,0 +1,56 @@
+/* .main{
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    flex-grow:20;
+} */
+
+/* #dd-tab-output-container{
+    align-items:center;
+} */
+
+.maps{
+    display:flex;
+    flex-direction:row;
+    gap:10px;
+}
+
+#tabs-inline{
+    display:block;
+    width:75%;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.tab{
+    gap:10px;
+}
+
+.dropdown-class {
+    display:flex;
+    flex-direction:row;
+    width:500px;
+    height:100px;
+    justify-content: center;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+#dropdown{
+    width:200px;
+}
+
+#dropdown-days{
+    width:200px;
+}
+
+.lastrow{
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.piechart{
+    width: 600px;
+    padding: 50px;
+}
