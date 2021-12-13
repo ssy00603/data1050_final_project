@@ -9,6 +9,7 @@ from dash.dependencies import Input, Output
 from dash import dash_table
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter, FormatStrFormatter
+import numpy as np
 
 
 app = dash.Dash(__name__)
@@ -35,6 +36,11 @@ app.layout = html.Div(className = 'main', children = [
         n_intervals=0
     ),
 
+    html.H4(children="This web page is an overview of the daily cases, deaths, and trends of COVID-19 in the United States. COVID-19 is an illness caused by coronavirus and similar to the common cold. But the symptom of COVID-19 can be severe and causes millions of deaths. So it is important for us to constantly track the spreads of COVID-19", style = {'text-align':'center'}),
+    
+    html.H4(children="Cases Trends"),
+    html.P(children="The first chart shows how daily new cases have changed in each state of the country. The exact state and number of days to display can be chosen below. The trends of total cases and deaths are shown below as well."),
+    
     # Add tabs
     dcc.Tabs(id="tabs-inline", value='tab-1', children=[
         # Add tab of New Cases
@@ -70,12 +76,19 @@ app.layout = html.Div(className = 'main', children = [
             dcc.Graph(id="bar-chart-death")
         ])]),
 
+        html.H4(children="Cases Maps"),
+        html.P(children="The first map shows the number of vaccinations in each state. The second map shows the total confirmed cases in each state."),
+
         html.Div(className = 'maps',children = [
         # Display map
         dcc.Graph(id="map-vaccine"),
 
         # Display map
         dcc.Graph(id="map-confirm-case")]),
+        
+        html.H4(children="Top Cases"),
+        html.P(children="The first chart shows the states with highest number of confirmed case. The second line plot shows the continents with highest number of confirmed case."),
+
         html.Div(className='lastrow',children = [
         html.Div(className = 'piechart',children = [
         dcc.Dropdown(
@@ -88,6 +101,7 @@ app.layout = html.Div(className = 'main', children = [
             value = 'Top 5',
             clearable=False
         ),
+
         dcc.Tabs(
             id = 'cases-deaths-tabs',
             value = 'cases',
@@ -96,13 +110,28 @@ app.layout = html.Div(className = 'main', children = [
                 dcc.Tab(id = 'death-tab',label = 'Deaths', value = 'deaths')
             ]
         ),
+
         html.Div(id = 'dd-tab-output-container'),
         ]),
         dcc.Graph(id = 'line-graph',
             figure = px.line(df_line, x='date', y='total_cases', color='continent',labels = {'continent':'Continents'},
             title='Global Confirmed Cases by Continent').update_layout({'plot_bgcolor':'white'}),
-        )
-    ])
+        ),       
+    ]),
+    dcc.Slider(
+        id='line-graph-slider',
+        min=1,
+        max=24,
+        step=1,
+        value=24,
+        marks={
+            1: '1 month',
+            6: '6 months',
+            12: '1 year',
+            18: '1 year 6 months',
+            24: '2 years'
+        }
+    )     
 ])
 
 
@@ -319,6 +348,24 @@ def render_piechart(interval,dropdown,tab):
                 figure = death_figure
             )
         ])
+
+@app.callback(
+    Output('line-graph','figure'),
+    [Input('line-graph-slider','value')]
+)
+def line_graph_update(value):
+    df1=df_line
+    df2 = df1.date.str.split(r"-", n=-1,expand=True)
+    step_ind = list(np.zeros(4186))
+    for i in range(4180):
+        if df2[0][i] == '2020':
+            step_ind[i] = int(df2[1][i])
+        else:
+            step_ind[i] = int(df2[1][i]) * 2
+            
+    df1["steo_ind"] = step_ind
+    df1 = df1[df1.steo_ind<=value]
+    return px.line(df1, x='date', y='total_cases', color='continent',labels = {'continent':'Continents'},title='Global Confirmed Cases by Continent').update_layout({'plot_bgcolor':'white'})
 
 
 if __name__ == '__main__':
